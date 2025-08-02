@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include "requests.h"
+#include "logging.h"
+
 
 int test_get_request() {
   Response* response = get_request("https://jsonplaceholder.typicode.com/todos/1");
   if (response == NULL) return 1;
   
-  printf("Status code: %ld\n", response->status_code);
+  log_info("Status code: %ld", response->status_code);
   printf("-------------------------\n");
-  printf("Response Content:\n\n%s\n\n", response->content);
+  log_info("Response Content:\n\n%s\n", response->content);
   printf("-------------------------\n");
 
   destroy_response(&response);
-  printf("%s\n", response == NULL ? "Nullified response" : "Failed to nullify response");
+  log_info("%s", response == NULL ? "Nullified response" : "Failed to nullify response");
   return 0;
 }
 
@@ -28,17 +30,23 @@ int test_post_request() {
   );
 
   if (response == NULL) return 1;
-  printf("Status code: %ld\n", response->status_code);
+  log_info("Status code: %ld", response->status_code);
   printf("-------------------------\n");
-  printf("Response Content:\n\n%s\n\n", response->content);
+  log_info("Response Content:\n\n%s\n", response->content);
   printf("-------------------------\n");
 
   destroy_response(&response);
-  printf("%s\n", response == NULL ? "Nullified response" : "Failed to nullify response");
+  log_info("%s", response == NULL ? "Nullified response" : "Failed to nullify response");
   return 0;
 }
 
 int main() {
+  log_info("Testing get request:\n");
+  printf("~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
   test_get_request();
+  printf("\n~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+  log_info("Testing post request:\n");
+  printf("~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
   test_post_request();
+  printf("\n~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
 }
