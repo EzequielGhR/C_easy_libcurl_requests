@@ -31,6 +31,17 @@ size_t _write_memory_callback(void* contents, size_t size, size_t nmemb, void* u
 }
 
 
+void _free_headers(struct curl_slist** headers_list_ptr) {
+  if (headers_list_ptr == NULL || *headers_list_ptr == NULL) {
+    log_warning("Headers list is null");
+    return;
+  }
+
+  free(*headers_list_ptr);
+  *headers_list_ptr = NULL;
+}
+
+
 Response* get_request(const char* url) {
   CURL*                 curl;
   CURLcode              response;
@@ -119,6 +130,7 @@ Response* post_request(
     log_error("Failed to perform post request");
     free(chunk.memory);
     curl_easy_cleanup(curl);
+    _free_headers(&headers);
     return NULL;
   }
 
@@ -129,6 +141,7 @@ Response* post_request(
   output->status_code = status_code;
   
   curl_easy_cleanup(curl);
+  _free_headers(&headers);
   return output;
 }
 
