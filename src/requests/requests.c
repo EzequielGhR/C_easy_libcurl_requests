@@ -42,6 +42,27 @@ void _free_headers(struct curl_slist** headers_list_ptr) {
 }
 
 
+int _set_headers(struct curl_slist** headers_list_ptr, char** headers_array, int header_count) {
+  if (headers_array == NULL || header_count <= 0) {
+    log_warning("No headers to set");
+    return 1;
+  }
+
+  if (headers_list_ptr == NULL) {
+    log_error("Headers list pointer is null, cannot dereference");
+    return 0;
+  }
+
+  struct curl_slist* dref_headers = *headers_list_ptr;
+  for (int i = 0; i < header_count; i++) {
+    dref_headers = curl_slist_append(dref_headers, headers_array[i]);
+  }
+
+  *headers_list_ptr = dref_headers;
+  return 1; 
+}
+
+
 Response* get_request(const char* url) {
   CURL*                 curl;
   CURLcode              response;
@@ -100,6 +121,8 @@ Response* post_request(
     log_warning("No data to post");
     return NULL;
   }
+
+  if (!_set_headers(&headers, headers_array, header_count)) return NULL;
   
   if (headers_array != NULL) {
     for (int i = 0; i < header_count; i++) {
