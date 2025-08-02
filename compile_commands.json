@@ -1,0 +1,8 @@
+[
+  {
+    "directory": "/home/zeke/repos/C_easy_libcurl_requests",
+    "command": "gcc -I./src/logging -I./src/requests -lcurl -o bin/test src/logging/logging.c src/requests/requests.c src/tests/test.c",
+    "file": "src/tests/test.c"
+  }
+]
+
