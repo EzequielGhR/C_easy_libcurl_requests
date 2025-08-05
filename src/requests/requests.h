@@ -8,7 +8,7 @@
     long status_code;
   } Response;
     
-  Response* get_request(const char* url);
+  Response* get_request(const char* url, char** headers_array, int header_count);
   Response* post_request(const char* url, char* data, size_t data_size, char** headers_array, int header_count);
   void destroy_response(Response** response_ptr);
   

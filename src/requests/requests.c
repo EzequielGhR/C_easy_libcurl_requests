@@ -63,9 +63,10 @@ int _set_headers(struct curl_slist** headers_list_ptr, char** headers_array, int
 }
 
 
-Response* get_request(const char* url) {
+Response* get_request(const char* url, char** headers_array, int header_count) {
   CURL*                 curl;
   CURLcode              response;
+  struct curl_slist*    headers = NULL;
   struct MemoryStruct   chunk;
   long                  response_code;
   Response*             output;
@@ -76,18 +77,27 @@ Response* get_request(const char* url) {
     return NULL;
   }
 
+  
+  if (!_set_headers(&headers, headers_array, header_count)) return NULL;
+
   chunk.memory = malloc(1);
   chunk.size   = 0;
   
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _write_memory_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&chunk);
+
+  
+  if (headers != NULL) {
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  }
   
   response = curl_easy_perform(curl);
   if (response != CURLE_OK) {
     log_warning("Failed request");
     free(chunk.memory);
     curl_easy_cleanup(curl);
+    _free_headers(&headers);
     return NULL;
   }
 
@@ -98,7 +108,7 @@ Response* get_request(const char* url) {
   output->status_code = response_code;
 
   curl_easy_cleanup(curl);
-
+  _free_headers(&headers);
   return output;
 }
 
@@ -124,12 +134,6 @@ Response* post_request(
 
   if (!_set_headers(&headers, headers_array, header_count)) return NULL;
   
-  if (headers_array != NULL) {
-    for (int i = 0; i < header_count; i++) {
-      headers = curl_slist_append(headers, headers_array[i]);
-    }
-  }
-
   curl = curl_easy_init();
   if (curl == NULL) {
     log_error("Could not initialize curl");
